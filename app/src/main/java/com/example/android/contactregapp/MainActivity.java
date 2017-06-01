@@ -22,7 +22,18 @@ package com.example.android.contactregapp;
         import java.text.SimpleDateFormat;
         import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements OnClickListener{
+        import java.util.ArrayList;
+        import java.util.List;
+
+        import android.content.ContentValues;
+        import android.content.Context;
+        import android.database.Cursor;
+        import android.database.SQLException;
+        import android.database.sqlite.SQLiteDatabase;
+
+        import org.w3c.dom.Comment;
+
+public class MainActivity extends AppCompatActivity implements OnClickListener {
 
     private static final String TAG = "MainActivity_TAG";
 
@@ -33,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener{
     private Button openCameraBT;
     private Button saveContactBT;
     private Button viewListBT;
+    private ContactsDataSource datasource;
     static final int REQUEST_TAKE_PHOTO = 1;
     String mCurrentPhotoPath;
 
@@ -42,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        datasource = new ContactsDataSource(this);
+        datasource.open();
 
         firstNameET = (EditText) findViewById(R.id.firstName);
         lastNameET = (EditText) findViewById(R.id.lastName);
@@ -101,12 +116,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener{
             case R.id.saveContact_bt:
                 String firstName = firstNameET.getText().toString();
                 String lastName = lastNameET.getText().toString();
-                Toast.makeText(this,firstName + " " + lastName + " " + mCurrentPhotoPath, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, firstName + " " + lastName + " " + mCurrentPhotoPath, Toast.LENGTH_SHORT).show();
+                datasource.createContact(firstName, lastName, mCurrentPhotoPath);
                 break;
             case R.id.viewList_bt:
+                Intent i = new Intent(MainActivity.this, contactListActivity.class);
+                startActivity(i);
                 break;
             default:
                 return;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        datasource.close();
     }
 }
